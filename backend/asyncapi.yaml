@@ -1,0 +1,464 @@
+asyncapi: 2.0.0
+info:
+  title: ImageShow Realtime API
+  version: 1.0.0
+  description: |
+    Real‑time events used by the ImageShow client to keep the
+    global state in sync with server‑driven changes.  
+    All schemas are derived from the Zod definitions and use
+    snake_case field names.
+servers:
+  dev:
+    url: http://localhost:3000
+    protocol: ws
+    description: Development WebSocket server
+channels:
+  auth/signup:
+    description: Fired after a successful user registration.
+    publish:
+      operationId: onUserSignedUp
+      message:
+        $ref: "#/components/messages/UserCreated"
+  auth/login:
+    description: Fired after a successful login.
+    publish:
+      operationId: onUserLoggedIn
+      message:
+        $ref: "#/components/messages/UserAuthenticated"
+  auth/logout:
+    description: Fired when a user logs out.
+    publish:
+      operationId: onUserLoggedOut
+      message:
+        $ref: "#/components/messages/UserLoggedOut"
+  auth/error:
+    description: General authentication error event.
+    publish:
+      operationId: onAuthError
+      message:
+        $ref: "#/components/messages/RealtimeError"
+  user/profile/updated:
+    description: Fired when the authenticated user updates their profile.
+    publish:
+      operationId: onProfileUpdated
+      message:
+        $ref: "#/components/messages/UserProfileUpdated"
+  theme/mode_changed:
+    description: Fired when the user toggles light/dark mode.
+    publish:
+      operationId: onThemeModeChanged
+      message:
+        $ref: "#/components/messages/ThemeModeChanged"
+  gallery/{gallery_id}/created:
+    description: Fired when a new gallery is created.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryCreated
+      message:
+        $ref: "#/components/messages/GalleryCreated"
+  gallery/{gallery_id}/updated:
+    description: Fired after a gallery is edited.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryUpdated
+      message:
+        $ref: "#/components/messages/GalleryUpdated"
+  gallery/{gallery_id}/deleted:
+    description: Fired when a gallery is deleted.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryDeleted
+      message:
+        $ref: "#/components/messages/GalleryDeleted"
+  gallery/{gallery_id}/image/{image_id}/uploaded:
+    description: Fired when a new image is uploaded to a gallery.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+      image_id:
+        $ref: "#/components/parameters/ImageId"
+    publish:
+      operationId: onImageUploaded
+      message:
+        $ref: "#/components/messages/ImageUploaded"
+  gallery/{gallery_id}/image/{image_id}/updated:
+    description: Fired when an image's metadata is updated.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+      image_id:
+        $ref: "#/components/parameters/ImageId"
+    publish:
+      operationId: onImageUpdated
+      message:
+        $ref: "#/components/messages/ImageUpdated"
+  gallery/{gallery_id}/image/{image_id}/duplicated:
+    description: Fired when an image is duplicated within a gallery.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+      image_id:
+        $ref: "#/components/parameters/ImageId"
+    publish:
+      operationId: onImageDuplicated
+      message:
+        $ref: "#/components/messages/ImageDuplicated"
+  gallery/{gallery_id}/image/{image_id}/deleted:
+    description: Fired when an image is removed from a gallery.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+      image_id:
+        $ref: "#/components/parameters/ImageId"
+    publish:
+      operationId: onImageDeleted
+      message:
+        $ref: "#/components/messages/ImageDeleted"
+  gallery/{gallery_id}/published:
+    description: Fired after a gallery's public/private status changes.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryPublished
+      message:
+        $ref: "#/components/messages/GalleryPublished"
+  gallery/{gallery_id}/visibility_changed:
+    description: Fired when gallery visibility (public/private/friends) is modified.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryVisibilityChanged
+      message:
+        $ref: "#/components/messages/GalleryVisibilityChanged"
+  gallery/{gallery_id}/viewed:
+    description: Fired each time a gallery page is rendered publicly.
+    parameters:
+      gallery_id:
+        $ref: "#/components/parameters/GalleryId"
+    publish:
+      operationId: onGalleryViewed
+      message:
+        $ref: "#/components/messages/GalleryViewed"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+          nullable: true
+        profile_photo_url:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        contact_link:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - user_id
+        - email
+        - created_at
+        - updated_at
+    Gallery:
+      type: object
+      properties:
+        gallery_id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        template_name:
+          type: string
+        visibility:
+          type: string
+          enum:
+            - public
+            - private
+            - friends
+        is_published:
+          type: boolean
+        view_count:
+          type: integer
+          format: int32
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - gallery_id
+        - user_id
+        - title
+        - template_name
+        - visibility
+        - is_published
+        - view_count
+        - created_at
+        - updated_at
+    Image:
+      type: object
+      properties:
+        image_id:
+          type: string
+        gallery_id:
+          type: string
+        file_url:
+          type: string
+          format: uri
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        alt_text:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        order_index:
+          type: integer
+          format: int32
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - image_id
+        - gallery_id
+        - file_url
+        - title
+        - alt_text
+        - order_index
+        - created_at
+    RealtimeError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ThemeMode:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - light
+            - dark
+      required:
+        - mode
+    ViewLog:
+      type: object
+      properties:
+        view_id:
+          type: string
+        gallery_id:
+          type: string
+        ip_address:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - view_id
+        - gallery_id
+        - ip_address
+        - created_at
+    ImageDuplicatedPayload:
+      type: object
+      properties:
+        original_image_id:
+          type: string
+        new_image_id:
+          type: string
+        gallery_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - original_image_id
+        - new_image_id
+        - gallery_id
+        - created_at
+    GalleryPublishedPayload:
+      type: object
+      properties:
+        gallery_id:
+          type: string
+        is_published:
+          type: boolean
+      required:
+        - gallery_id
+        - is_published
+    GalleryVisibilityPayload:
+      type: object
+      properties:
+        gallery_id:
+          type: string
+        visibility:
+          type: string
+          enum:
+            - public
+            - private
+            - friends
+      required:
+        - gallery_id
+        - visibility
+    GalleryViewedPayload:
+      type: object
+      properties:
+        view_id:
+          type: string
+        gallery_id:
+          type: string
+        ip_address:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - view_id
+        - gallery_id
+        - ip_address
+        - created_at
+  parameters:
+    GalleryId:
+      name: gallery_id
+      in: path
+      required: true
+      description: Identifier of the gallery
+      schema:
+        type: string
+    ImageId:
+      name: image_id
+      in: path
+      required: true
+      description: Identifier of the image
+      schema:
+        type: string
+  messages:
+    UserCreated:
+      name: UserCreated
+      title: User Created
+      payload:
+        $ref: "#/components/schemas/User"
+    UserAuthenticated:
+      name: UserAuthenticated
+      title: User Authenticated
+      payload:
+        $ref: "#/components/schemas/User"
+    UserLoggedOut:
+      name: UserLoggedOut
+      title: User Logged Out
+      payload:
+        type: object
+        properties:
+          user_id:
+            type: string
+        required:
+          - user_id
+    RealtimeError:
+      name: RealtimeError
+      title: Realtime Error
+      payload:
+        $ref: "#/components/schemas/RealtimeError"
+    UserProfileUpdated:
+      name: UserProfileUpdated
+      title: User Profile Updated
+      payload:
+        $ref: "#/components/schemas/User"
+    ThemeModeChanged:
+      name: ThemeModeChanged
+      title: Theme Mode Changed
+      payload:
+        $ref: "#/components/schemas/ThemeMode"
+    GalleryCreated:
+      name: GalleryCreated
+      title: Gallery Created
+      payload:
+        $ref: "#/components/schemas/Gallery"
+    GalleryUpdated:
+      name: GalleryUpdated
+      title: Gallery Updated
+      payload:
+        $ref: "#/components/schemas/Gallery"
+    GalleryDeleted:
+      name: GalleryDeleted
+      title: Gallery Deleted
+      payload:
+        type: object
+        properties:
+          gallery_id:
+            type: string
+        required:
+          - gallery_id
+    ImageUploaded:
+      name: ImageUploaded
+      title: Image Uploaded
+      payload:
+        $ref: "#/components/schemas/Image"
+    ImageUpdated:
+      name: ImageUpdated
+      title: Image Updated
+      payload:
+        $ref: "#/components/schemas/Image"
+    ImageDuplicated:
+      name: ImageDuplicated
+      title: Image Duplicated
+      payload:
+        $ref: "#/components/schemas/ImageDuplicatedPayload"
+    ImageDeleted:
+      name: ImageDeleted
+      title: Image Deleted
+      payload:
+        type: object
+        properties:
+          image_id:
+            type: string
+        required:
+          - image_id
+    GalleryPublished:
+      name: GalleryPublished
+      title: Gallery Published / Unpublished
+      payload:
+        $ref: "#/components/schemas/GalleryPublishedPayload"
+    GalleryVisibilityChanged:
+      name: GalleryVisibilityChanged
+      title: Gallery Visibility Changed
+      payload:
+        $ref: "#/components/schemas/GalleryVisibilityPayload"
+    GalleryViewed:
+      name: GalleryViewed
+      title: Gallery Viewed
+      payload:
+        $ref: "#/components/schemas/ViewLog"

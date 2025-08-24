@@ -1,0 +1,575 @@
+>-
+```yaml
+
+openapi: 3.0.0
+
+info:
+  title: ImageShow API
+  version: 1.0.0
+  description: |
+    API specification for the ImageShow platform.  
+    All schemas are derived from the provided Zod definitions and use snake_case naming.
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    galleryId:
+      name: gallery_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identifier of a gallery
+    imageId:
+      name: image_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identifier of an image
+    tokenParam:
+      name: token
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Token string for verification or reset
+    pageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for paginated results
+    limitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+      description: Number of items per page
+    tagParam:
+      name: tag
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Tag used to filter galleries
+  schemas:
+    User:
+      type: object
+      required:
+        - user_id
+        - email
+        - name
+        - profile_photo_url
+        - bio
+        - contact_link
+        - created_at
+        - updated_at
+      properties:
+       _id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+          nullable: true
+        profile_photo_url:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        contact_link:
+          type: string
+          format: uri
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateUserInput:
+      type: object
+      required:
+        - email
+        - password_hash
+        - name
+        - profile_photo_url
+        - bio
+        - contact_link
+      properties:
+        email:
+          type: string
+          format: email
+        password_hash:
+          type: string
+          minLength: 8
+        name:
+          type: string
+          nullable: true
+        profile_photo_url:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        contact_link:
+          type: string
+          format: uri
+          nullable: true
+
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password_hash
+      properties:
+        email:
+          type: string
+          format: email
+        password_hash:
+          type: string
+          minLength: 8
+
+    UpdateUserInput:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        password_hash:
+          type: string
+          minLength: 8
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        profile_photo_url:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        contact_link:
+          type: string
+          format: uri
+          nullable: true
+
+    AuthResponse:
+      type: object
+      required:
+        - access_token
+        - user
+      properties:
+        access_token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    Gallery:
+      type: object
+      required:
+        - gallery_id
+        - user_id
+        - title
+        - template_name
+        - visibility
+        - is_published
+        - view_count
+        - created_at
+        - updated_at
+      properties:
+        gallery_id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        template_name:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private, friends]
+        is_published:
+          type: boolean
+        view_count:
+          type: integer
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GalleryCreateInput:
+      type: object
+      required:
+        - user_id
+        - title
+        - template_name
+        - visibility
+      properties:
+        user_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        template_name:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private, friends]
+        is_published:
+          type: boolean
+
+    GalleryUpdateInput:
+      type: object
+      required:
+        - gallery_id
+      properties:
+        gallery_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        template_name:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private, friends]
+        is_published:
+          type: boolean
+
+    Image:
+      type: object
+      required:
+        - image_id
+        - gallery_id
+        - file_url
+        - title
+        - alt_text
+        - order_index
+        - created_at
+      properties:
+        image_id:
+          type: string
+        gallery_id:
+          type: string
+        file_url:
+          type: string
+          format: uri
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        alt_text:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        order_index:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+
+    CreateImageInput:
+      type: object
+      required:
+        - gallery_id
+        - file_url
+        - title
+        - alt_text
+        - order_index
+      properties:
+        gallery_id:
+          type: string
+        file_url:
+          type: string
+          format: uri
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        alt_text:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        order_index:
+          type: integer
+          minimum: 1
+
+    UpdateImageInput:
+      type: object
+      required:
+        - image_id
+      properties:
+        image_id:
+          type: string
+        file_url:
+          type: string
+          format: uri
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        alt_text:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+        order_index:
+          type: integer
+          minimum: 1
+
+    DuplicateImageResponse:
+      type: object
+      required:
+        - image
+      properties:
+        image:
+          $ref: '#/components/schemas/Image'
+
+    ReorderImagesRequest:
+      type: object
+      required:
+        - order
+      properties:
+        order:
+          type: array
+          items:
+            type: string
+
+    GalleryWithImages:
+      allOf:
+        - $ref: '#/components/schemas/Gallery'
+        - type: object
+          properties:
+            images:
+              type: array
+              items:
+                $ref: '#/components/schemas/Image'
+
+    SearchResults:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - limit
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gallery'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+
+    ViewLog:
+      type: object
+      required:
+        - view_id
+        - gallery_id
+        - ip_address
+        - created_at
+      properties:
+        view_id:
+          type: string
+        gallery_id:
+          type: string
+        ip_address:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateViewLogInput:
+      type: object
+      required:
+        - view_id
+        - gallery_id
+        - ip_address
+      properties:
+        view_id:
+          type: string
+        gallery_id:
+          type: string
+        ip_address:
+          type: string
+
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserInput'
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/login:
+    post:
+      summary: Login user
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/verify-email/{token}:
+    get:
+      summary: Verify email address
+      operationId: verifyEmail
+      parameters:
+        - $ref: '#/components/parameters/tokenParam'
+      responses:
+        '200':
+          description: Email verified
+
+  /auth/password-reset-request:
+    post:
+      summary: Request password reset email
+      operationId: requestPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Reset email sent
+
+  /auth/password-reset/{token}:
+    post:
+      summary: Reset password using token
+      operationId: resetPassword
+      parameters:
+        - $ref: '#/components/parameters/tokenParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password_hash
+              properties:
+                password_hash:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Password reset successful
+
+  /users/me:
+    get:
+      summary: Get current user profile
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInput'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /galleries:
+    get:
+      summary: List galleries (owned by user or public)
+      operationId: listGalleries
+      parameters:
+        -

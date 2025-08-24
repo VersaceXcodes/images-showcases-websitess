@@ -1,0 +1,19 @@
+{
+  "timestamp": 1756063588616,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_TopNavigation",
+      "version": "1756063558987"
+    }
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/vitereact/src/components/views/GV_TopNavigation.tsx",
+      "type": "text",
+      "size": 5809,
+      "dependencies": false
+    }
+  ]
+}

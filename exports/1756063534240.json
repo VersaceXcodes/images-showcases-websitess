@@ -1,0 +1,19 @@
+{
+  "timestamp": 1756063534240,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_EmailVerification",
+      "version": "latest"
+    }
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/vitereact/src/components/views/UV_EmailVerification.tsx",
+      "type": "text",
+      "size": 7290,
+      "dependencies": false
+    }
+  ]
+}

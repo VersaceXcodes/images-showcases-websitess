@@ -1,0 +1,19 @@
+{
+  "timestamp": 1756063488149,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_403Error",
+      "version": "latest"
+    }
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/vitereact/src/components/views/GV_403Error.tsx",
+      "type": "text",
+      "size": 1807,
+      "dependencies": false
+    }
+  ]
+}

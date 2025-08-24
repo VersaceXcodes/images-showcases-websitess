@@ -1,0 +1,19 @@
+{
+  "timestamp": 1756063501395,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_DarkModeToggle",
+      "version": "1756063463861"
+    }
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/vitereact/src/components/views/GV_DarkModeToggle.tsx",
+      "type": "text",
+      "size": 2100,
+      "dependencies": false
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "timestamp": 1756063281764,
+  "operation": {
+    "id": "settings:config:package"
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/backend/package.json",
+      "type": "text",
+      "size": 1443,
+      "dependencies": true
+    }
+  ]
+}

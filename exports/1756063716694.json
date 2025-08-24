@@ -1,0 +1,19 @@
+{
+  "timestamp": 1756063716694,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_Profile",
+      "version": "latest"
+    }
+  },
+  "projectId": "images-showcases-websitess",
+  "files": [
+    {
+      "path": "../../apps/images-showcases-websitess/vitereact/src/components/views/UV_Profile.tsx",
+      "type": "text",
+      "size": 13474,
+      "dependencies": false
+    }
+  ]
+}
