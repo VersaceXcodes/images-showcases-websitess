@@ -1,192 +1,130 @@
-VALIDATION FAILURE - Frontend TypeScript Compilation (Attempt 1/100)
+TASK: Create real API E2E auth tests (register -> logout -> sign-in) for a Vite+React+TS app using Vitest.
 
-The project validation failed at the "Frontend TypeScript Compilation" step. You need to analyze the error and fix it.
+AGENT FILE CONTEXT - YOU MUST READ THESE FILES IN THE SANDBOX FIRST:
+Before generating or fixing tests:
+1) Read Store (Zustand) to confirm auth state shape, selectors, and actions.
+   Candidates (first that exists):
+   - /app/vitereact/src/store/main.tsx
+2) Read Backend server for auth API endpoints (paths, payloads, responses).
+   Candidates:
+   - /app/backend/server.ts
+3) Read Database schema (to understand constraints/defaults).
+   Candidates:
+   - /app/backend/db.sql
+   Summarize only relevant parts (users table, unique email, required fields).
+4) Read Frontend routes/config for aliases and navigation.
+   - /app/vitereact/tsconfig.json (paths)
+   - /app/vitereact/vite.config.ts (resolve.alias)
+   - /app/vitereact/src/App.tsx (confirm login route path, e.g., "/login")
+- Do NOT mock the API. Use the real backend running at ${import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"}.
+- Prefer direct component import if an auth view exists; otherwise test the App-level route.
+- Place tests at: /app/vitereact/src/__tests__/auth.e2e.test.tsx
+- Ensure vitest config exists (vitest.config.ts with jsdom, globals, setupFiles ./src/test/setup.ts) and src/test/setup.ts imports @testing-library/jest-dom.
+- Ensure .env.test sets VITE_API_BASE_URL=http://localhost:3000.
+- If "@/..." aliases are used but not configured, add Vite resolve.alias and tsconfig paths so "@/store/main" and "@/App" resolve correctly.
+- Use a unique email per run to avoid duplicates (e.g., user${Date.now()}@example.com).
+- Use BrowserRouter wrapper for direct view tests; use MemoryRouter initialEntries=[ "/login" ] for App-level tests.
+- Never mock network; keep assertions on Zustand store:
+  state.authentication_state.authentication_status.is_authenticated === true and state.authentication_state.auth_token truthy.
+- Make selectors resilient to label/button variants:
+  labels: /email address|email/i, /password/i;
+  buttons: /sign in|log in|register|sign up|create/i.
 
-## Error Details:
-src/components/views/GV_TopNavigation.tsx(112,21): error TS1003: Identifier expected.
-src/components/views/GV_TopNavigation.tsx(112,22): error TS1002: Unterminated string literal.
-src/components/views/GV_TopNavigation.tsx(114,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
-src/components/views/GV_TopNavigation.tsx(116,19): error TS17002: Expected corresponding JSX closing tag for 'div'.
-src/components/views/GV_TopNavigation.tsx(117,16): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
-src/components/views/GV_TopNavigation.tsx(153,11): error TS17002: Expected corresponding JSX closing tag for 'nav'.
-src/components/views/GV_TopNavigation.tsx(154,9): error TS17015: Expected corresponding closing tag for JSX fragment.
-src/components/views/GV_TopNavigation.tsx(155,5): error TS1109: Expression expected.
-src/components/views/GV_TopNavigation.tsx(155,7): error TS1109: Expression expected.
-src/components/views/GV_TopNavigation.tsx(156,3): error TS1109: Expression expected.
-src/components/views/GV_TopNavigation.tsx(157,1): error TS1128: Declaration or statement expected.
-src/components/views/UV_GalleryEdit.tsx(1,1): error TS1434: Unexpected keyword or identifier.
-src/components/views/UV_GalleryEdit.tsx(1,5): error TS1434: Unexpected keyword or identifier.
-src/components/views/UV_Landing.tsx(1,3): error TS1109: Expression expected.
-src/components/views/UV_Landing.tsx(4,1): error TS1109: Expression expected.
-src/components/views/UV_Profile.tsx(239,12): error TS17008: JSX element 'form' has no corresponding closing tag.
-src/components/views/UV_Profile.tsx(328,18): error TS1003: Identifier expected.
-src/components/views/UV_Profile.tsx(328,25): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
-src/components/views/UV_Profile.tsx(416,13): error TS17002: Expected corresponding JSX closing tag for 'div'.
-src/components/views/UV_Profile.tsx(417,11): error TS17015: Expected corresponding closing tag for JSX fragment.
-src/components/views/UV_Profile.tsx(418,7): error TS1109: Expression expected.
-src/components/views/UV_Profile.tsx(419,5): error TS1109: Expression expected.
-src/components/views/UV_Profile.tsx(419,7): error TS1109: Expression expected.
-src/components/views/UV_Profile.tsx(420,3): error TS1109: Expression expected.
-src/components/views/UV_Profile.tsx(421,1): error TS1128: Declaration or statement expected.
+Discovery instructions:
+- Search for auth view under /app/vitereact/src/components/views (depth<=2) with filename containing /(login|signin|auth)/i.
+- If found, import its default export and render it directly.
+Outputs to create/update in /app/vitereact:
+- vitest.config.ts
+- src/test/setup.ts
+- .env.test
+- src/__tests__/auth.e2e.test.tsx
 
+Constraints:
+- No additional libraries beyond vitest/@testing-library/jsdom/user-event/react-dom testing utilities.
+- Keep code TypeScript-friendly (tsx).
 
-## Validation Context:
-- Step: Frontend TypeScript Compilation
-- Working Directory: /app/vitereact
-- Attempt: 1/100
-- Previous failures for this step: 1
+Additional guardrails:
+- Do NOT hardcode real credentials in the test.
+- If a sign-in-only flow is required, read VITE_REAL_TEST_EMAIL and VITE_REAL_TEST_PASSWORD from .env.test when present.
+- Prefer a register-first flow with a unique timestamped email to avoid collisions.
+- Always import the Zustand store via "@/store/main" and repair Vite/tsconfig aliases if they are missing.
 
-## Project Memory Summary:
-- Total validation attempts: 5
-- Common issues encountered: None
-- Known dependencies: @hookform/resolvers, @radix-ui/react-accordion, @radix-ui/react-alert-dialog, @radix-ui/react-aspect-ratio, @radix-ui/react-avatar, @radix-ui/react-checkbox, @radix-ui/react-collapsible, @radix-ui/react-context-menu, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu
-- Missing dependencies: None
+REFERENCE-ONLY EXAMPLE (do NOT copy credentials; adapt patterns only):
+```tsx
+import React from 'react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
 
-## Project Structure:
-FULL PROJECT STRUCTURE CONTEXT for Agent:
-=====================================
+import UV_SignIn from './UV_SignIn';
+import { useAppStore } from '@/store/main';
 
-Working Directory: /app/backend
+// IMPORTANT: For reference only. Do NOT hardcode real credentials.
+// If a sign-in-only flow is needed, read REAL_TEST_EMAIL and REAL_TEST_PASSWORD from .env.test.
+// Otherwise prefer register-first with a timestamped unique email in a separate test.
 
-PROJECT DIRECTORIES:
-/app
-/app/.git
-/app/.git/branches
-/app/.git/hooks
-/app/.git/info
-/app/.git/refs
-/app/.git/refs/heads
-/app/.git/refs/tags
-/app/.git/refs/remotes
-/app/.git/objects
-/app/.git/objects/pack
-/app/.git/objects/info
-/app/.git/objects/c0
-/app/.git/objects/22
-/app/.git/objects/53
-/app/.git/objects/07
-/app/.git/objects/4c
-/app/.git/objects/69
-/app/.git/logs
-/app/.git/logs/refs
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <BrowserRouter>{children}</BrowserRouter>
+);
 
+describe('UV_SignIn (Vitest, real API)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    // Ensure store starts not loading and unauthenticated (no token)
+    useAppStore.setState((state) => ({
+      authentication_state: {
+        ...state.authentication_state,
+        auth_token: null,
+        authentication_status: {
+          is_authenticated: false,
+          is_loading: false,
+        },
+        error_message: null,
+      },
+      current_workspace: null,
+    }));
+  });
 
-KEY PROJECT FILES:
-/app/README.md
-/app/backend/initdb.js
-/app/backend/jest.config.ts
-/app/backend/package.json
-/app/backend/schema.ts
-/app/backend/server.test.ts
-/app/backend/server.ts
-/app/backend/tsconfig.json
-/app/backend/package-lock.json
-/app/exports/1756054858969.json
-/app/exports/1756054975117.json
-/app/exports/1756055014163.json
-/app/exports/1756055114469.json
-/app/exports/1756055299386.json
-/app/exports/1756055324355.json
-/app/exports/1756055357614.json
-/app/exports/1756055357975.json
-/app/exports/1756055359906.json
-/app/exports/1756063279286.json
-/app/exports/1756063281764.json
-/app/exports/1756063485707.json
-/app/exports/1756063485980.json
-/app/exports/1756063487882.json
-/app/exports/1756063488149.json
-/app/exports/1756063488429.json
-/app/exports/1756063491370.json
-/app/exports/1756063501395.json
-/app/exports/1756063504442.json
-/app/exports/1756063504728.json
-/app/exports/1756063506030.json
-/app/exports/1756063507407.json
-/app/exports/1756063517688.json
-/app/exports/1756063517689.json
-/app/exports/1756063520524.json
-/app/exports/1756063534140.json
-/app/exports/1756063534240.json
-/app/exports/1756063562608.json
-/app/exports/1756063562951.json
-/app/exports/1756063588307.json
-/app/exports/1756063588435.json
-/app/exports/1756063588616.json
-/app/exports/1756063589070.json
-/app/exports/1756063591158.json
-/app/exports/1756063591515.json
-/app/exports/1756063716494.json
-/app/exports/1756063716694.json
-/app/exports/1756063718273.json
-/app/exports/1756063990223.json
-/app/exports/1756063990460.json
-/app/exports/1756063993869.json
+  it('signs in successfully with valid credentials', async () => {
+    render(<UV_SignIn />, { wrapper: Wrapper });
 
+    const emailInput = await screen.findByLabelText(/email address/i);
+    const passwordInput = await screen.findByLabelText(/password/i);
+    const submitButton = await screen.findByRole('button', { name: /sign in to your account/i });
 
-FRONTEND (vitereact) PACKAGE.JSON:
-  Scripts: dev, build, lint, preview
-  Dependencies: 62 packages
-  DevDependencies: 16 packages
-  Key Dependencies: @hookform/resolvers, @radix-ui/react-accordion, @radix-ui/react-alert-dialog, @radix-ui/react-aspect-ratio, @radix-ui/react-avatar, @radix-ui/react-checkbox, @radix-ui/react-collapsible, @radix-ui/react-context-menu, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu
+    // Ensure inputs are enabled before typing
+    await waitFor(() => {
+      expect(emailInput).not.toBeDisabled();
+      expect(passwordInput).not.toBeDisabled();
+    });
 
-BACKEND PACKAGE.JSON:
-  Scripts: start, build, dev, test, test:watch, test:coverage
-  Dependencies: 15 packages
-  Key Dependencies: @electric-sql/pglite, @types/bcryptjs, bcryptjs, cors, dotenv, express, jsonwebtoken, morgan, pg, ts-node
+    const user = userEvent.setup();
+    // DO NOT hardcode credentials. If env vars exist, use them:
+    // const REAL_EMAIL = import.meta.env.VITE_REAL_TEST_EMAIL;
+    // const REAL_PASSWORD = import.meta.env.VITE_REAL_TEST_PASSWORD;
 
-ROOT PACKAGE.JSON:
-  Scripts: dev
+    // Example (reference-only):
+    // await user.type(emailInput, REAL_EMAIL);
+    // await user.type(passwordInput, REAL_PASSWORD);
 
-BACKEND SCHEMA AVAILABLE:
-  Location: /app/backend/schema.ts
-  Size: 11663 characters
-  Contains Zod schemas for type validation
+    // Button should enable once both fields are filled
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+    await user.click(submitButton);
 
-BACKEND SERVER AVAILABLE:
-  Location: /app/backend/server.ts
-  Size: 39639 characters
-  Contains actual API endpoints and implementations
+    // Loading indicator appears after submit
+    await waitFor(() => expect(screen.getByText(/signing in/i)).toBeInTheDocument());
 
-PROTECTED DIRECTORIES (DO NOT MODIFY):
-  - /app/vitereact/src/components/ui/** (UI library)
-  - /app/node_modules/** (Dependencies)
-  - /app/.git/** (Version control)
+    // Wait for auth to complete and store to reflect authenticated state
+    await waitFor(
+      () => {
+        const state = useAppStore.getState();
+        expect(state.authentication_state.authentication_status.is_authenticated).toBe(true);
+        expect(state.authentication_state.auth_token).toBeTruthy();
+      },
+      { timeout: 20000 }
+    );
+  }, 30000);
+});
+```
 
-
-
-## Previous Validation Failures for Frontend TypeScript Compilation:
-- 5:59:46 PM: 
-
-## Your Task:
-1. **Analyze the Error**: Understand what specifically went wrong in the Frontend TypeScript Compilation step
-2. **Check Previous Attempts**: Consider if this is a recurring issue based on validation history
-3. **Locate the Problem**: Identify which files need to be modified
-4. **Apply Fixes**: Use the available tools to fix the specific issues
-5. **Focus on Root Cause**: Don't just suppress errors, fix the underlying problems
-
-
-
-
-
-## Important Notes:
-- You are working in a Modal Sandbox environment at /app/vitereact
-- Make changes to the actual project files that will be used in the next validation attempt
-- Always check packages are installed correctly, if not, install them, npm install
-- For TypeScript errors: Fix type issues, missing imports, etc.
-- For Build errors: Fix configuration issues, missing dependencies, syntax errors
-- For Lint errors: Fix code style issues, unused variables, missing dependencies, etc.
-- For Install errors: Fix package.json issues, dependency conflicts, etc.
-- For SQL errors: Fix syntax issues, schema problems, foreign key constraints, etc.
-- Use your memory context to avoid repeating failed approaches
-
-after you have fixed the issues, run the following commands to make sure there are no errors left:
-for typescript errors, run: cd /app/vitereact && npx tsc -b in /app/vitereact, it is important to run this command with -b so npx tsc -b in /app/vitereact
-for lint errors run npm run lint in vitereact
-for test errors, run: npm test in the appropriate directory (backend or vitereact)
-for SQL errors, run: node initdb.js in the backend directory to test database initialization
-
-MAKE SURE TO FIX ALL ERRORS! SMALL AND BIG!
-
-
-The validation will retry this step after your fixes. Make sure to address the specific error shown above.
