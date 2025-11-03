@@ -36,16 +36,17 @@ const UV_EmailVerification: React.FC = () => {
     isLoading,
     isError,
     refetch,
-  } = useQuery(
-    ['verify-email', token],
-    () => token && verifyEmailToken(token),
-    {
-      enabled: !!token,          // run only when token exists
-      retry: 1,                  // retry once on network failure
-      staleTime: 60000,           // keep result for 1 min
-      refetchOnWindowFocus: false,
-    }
-  );
+  } = useQuery({
+    queryKey: ['verify-email', token],
+    queryFn: () => {
+      if (!token) throw new Error('No token provided');
+      return verifyEmailToken(token);
+    },
+    enabled: !!token,
+    retry: 1,
+    staleTime: 60000,
+    refetchOnWindowFocus: false,
+  });
 
   /* --- Effect: automatically trigger verification on mount ------------------------ */
   useEffect(() => {

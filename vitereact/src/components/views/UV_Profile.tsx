@@ -1,9 +1,9 @@
 /*********************************************************************
- * UV_Profile – “User Profile” View
+ * UV_Profile - “User Profile” View
  *  - Authentication required
- *  - Avatar: 1:1 crop mention, ≤2 MB, instant preview
- *  - Name, bio (≤500 chars), contact link (URL)
- *  - Save button → PUT /api/users/me
+ *  - Avatar: 1:1 crop mention, <=2 MB, instant preview
+ *  - Name, bio (<=500 chars), contact link (URL)
+ *  - Save button -> PUT /api/users/me
  *  - Inline validation, error handling, loading states
  *********************************************************************/
 
@@ -35,7 +35,7 @@ interface UserProfile {
   updated_at: string;
 }
 
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2 MB
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 /**
@@ -82,12 +82,11 @@ const UV_Profile: React.FC = () => {
     unknown,
     void,
     unknown
-  >(
-    async () => {
+  >({
+    mutationFn: async () => {
       if (!authToken) throw new Error('No auth token');
 
       const formData = new FormData();
-      // Only include fields that the user actually changed
       if (name !== currentUser?.name) formData.append('name', name);
       if (bio !== currentUser?.bio) formData.append('bio', bio);
       if (contactLink !== currentUser?.contact_link)
@@ -106,31 +105,29 @@ const UV_Profile: React.FC = () => {
       );
       return resp.data;
     },
-    {
-      onSuccess: (data) => {
-        updateLocalProfile(data);
-        pushNotification({
-          id: Math.random().toString(36).substr(2, 9),
-          type: 'success',
-          text: 'Profile updated successfully.',
-          timeout: 4000,
-        });
-      },
-      onError: (error: any) => {
-        const msg =
-          error.response?.data?.message ||
-          error.message ||
-          'Failed to update profile.';
-        setGlobalError(msg);
-        pushNotification({
-          id: Math.random().toString(36).substr(2, 9),
-          type: 'error',
-          text: msg,
-          timeout: 4000,
-        });
-      },
-    }
-  );
+    onSuccess: (data) => {
+      updateLocalProfile(data);
+      pushNotification({
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'success',
+        text: 'Profile updated successfully.',
+        timeout: 4000,
+      });
+    },
+    onError: (error: any) => {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to update profile.';
+      setGlobalError(msg);
+      pushNotification({
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'error',
+        text: msg,
+        timeout: 4000,
+      });
+    },
+  });
 
   /** ==== Handlers ==== */
   const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +138,7 @@ const UV_Profile: React.FC = () => {
 
     // Size validation
     if (file.size > MAX_AVATAR_SIZE) {
-      setAvatarError('Avatar must be ≤ 2 MB.');
+      setAvatarError('Avatar must be <= 2 MB.');
       return;
     }
 
@@ -184,7 +181,7 @@ const UV_Profile: React.FC = () => {
       valid = false;
     }
     if (bio.length > 500) {
-      setBioError('Bio must be ≤ 500 characters.');
+      setBioError('Bio must be <= 500 characters.');
       valid = false;
     }
     if (contactLink.trim()) {
@@ -325,7 +322,7 @@ const UV_Profile: React.FC = () => {
             </div>
 
             {/* Bio */}
-            <Name="mb-4">
+            <div className="mb-4">
               <label
                 htmlFor="bio"
                 className="block text-sm font-medium text-gray-700"
@@ -381,10 +378,10 @@ const UV_Profile: React.FC = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {mutation.isLoading ? (
+                {mutation.isPending ? (
                   <>
                     <svg
                       className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"

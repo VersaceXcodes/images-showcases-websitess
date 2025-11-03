@@ -46,51 +46,47 @@ const UV_GalleryView: React.FC = () => {
     data: gallery,
     isLoading: galleryLoading,
     isError: galleryError,
-  } = useQuery<Gallery, Error>(
-    ["gallery", gallery_id],
-    async () => {
+  } = useQuery<Gallery, Error>({
+    queryKey: ["gallery", gallery_id],
+    queryFn: async () => {
       if (!gallery_id) throw new Error("Gallery ID is missing");
       const resp = await axios.get(`${API_BASE}/galleries/${gallery_id}`);
       return gallerySchema.parse(resp.data);
     },
-    {
-      staleTime: 60000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    }
-  );
+    staleTime: 60000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
 
   /* --------- Query: fetch images (once gallery is available) --------- */
   const {
     data: images,
     isLoading: imagesLoading,
     isError: imagesError,
-  } = useQuery<Image[], Error>(
-    ["galleryImages", gallery_id],
-    async () => {
+  } = useQuery<Image[], Error>({
+    queryKey: ["galleryImages", gallery_id],
+    queryFn: async () => {
       const resp = await axios.get(`${API_BASE}/galleries/${gallery_id}/images`);
       return resp.data.map((img: unknown) => imageSchema.parse(img));
     },
-    {
-      enabled: !!gallery_id, // run after gallery_id is defined
-      staleTime: 60000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    }
-  );
+    enabled: !!gallery_id,
+    staleTime: 60000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
 
   /* --------- Mutation: record view --------- */
-  const recordViewMut = useMutation(
-    async () => {
+  const recordViewMut = useMutation({
+    mutationFn: async () => {
       const payload = {
         view_id: uuidv4(),
         gallery_id: gallery_id!,
-        ip_address: "unknown", // client cannot determine IP
+        ip_address: "unknown",
       };
       await axios.post(`${API_BASE}/analytics/view`, payload);
     },
-    { retry: 1 }
-  );
+    retry: 1,
+  });
 
   /* --------- Side effect: after gallery is fetched --------- */
   useEffect(() => {
@@ -141,7 +137,7 @@ const UV_GalleryView: React.FC = () => {
         {(galleryError || imagesError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md" role="alert">
             <p className="font-medium">Error loading gallery.</p>
-            <p className="mt-2">{(galleryError ?? imagesError)?.message}</p>
+            <p className="mt-2">{galleryError ? 'Failed to load gallery' : 'Failed to load images'}</p>
           </div>
         )}
 

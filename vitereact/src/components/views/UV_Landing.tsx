@@ -1,6 +1,3 @@
----
-
-// src/views/UV_Landing.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 

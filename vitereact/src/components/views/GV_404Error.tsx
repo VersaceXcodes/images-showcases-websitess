@@ -12,7 +12,6 @@ const GV_404Error: React.FC = () => {
   const textSecondary = mode === 'dark' ? 'text-gray-300' : 'text-gray-600';
   const buttonBg = mode === 'dark' ? 'bg-blue-600' : 'bg-blue-600';
   const buttonHover = mode === 'dark' ? 'hover:bg-blue-700' : 'hover:bg-blue-700';
-  const border = mode === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
   return (
     <>

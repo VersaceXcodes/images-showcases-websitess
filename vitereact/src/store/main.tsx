@@ -130,14 +130,14 @@ export const useAppStore = create<AppState>()(
 
           const { user, access_token } = resp.data as { user: User; access_token: string };
 
-          set((s) => ({
+          set({
             authentication_state: {
               current_user: user,
               auth_token: access_token,
               authentication_status: { is_authenticated: true, is_loading: false },
               error_message: null,
             },
-          }));
+          });
 
           /* Auto‑connect socket for authenticated users */
           get().connect_socket();
@@ -182,14 +182,14 @@ export const useAppStore = create<AppState>()(
 
           const { user, access_token } = resp.data as { user: User; access_token: string };
 
-          set((s) => ({
+          set({
             authentication_state: {
               current_user: user,
               auth_token: access_token,
               authentication_status: { is_authenticated: true, is_loading: false },
               error_message: null,
             },
-          }));
+          });
 
           /* Auto‑connect socket */
           get().connect_socket();
@@ -217,7 +217,7 @@ export const useAppStore = create<AppState>()(
           set((s) => ({
             authentication_state: {
               ...s.authentication_state,
-              authentication_status: { ...s.authentication_status, is_loading: false },
+              authentication_status: { ...s.authentication_state.authentication_status, is_loading: false },
             },
           }));
           return;
@@ -227,37 +227,37 @@ export const useAppStore = create<AppState>()(
             `${API_PATH}/users/me`,
             { headers: { Authorization: `Bearer ${auth_token}` } }
           );
-          set((s) => ({
+          set({
             authentication_state: {
               current_user: resp.data,
               auth_token,
               authentication_status: { is_authenticated: true, is_loading: false },
               error_message: null,
             },
-          }));
+          });
           sb.connect_socket();
         } catch {
           /* Token invalid – clear state */
-          set((s) => ({
+          set({
             authentication_state: {
               current_user: null,
               auth_token: null,
               authentication_status: { is_authenticated: false, is_loading: false },
               error_message: null,
             },
-          }));
+          });
         }
       },
 
       logout_user: () => {
-        set((s) => ({
+        set({
           authentication_state: {
             current_user: null,
             auth_token: null,
             authentication_status: { is_authenticated: false, is_loading: false },
             error_message: null,
           },
-        }));
+        });
         get().disconnect_socket();
       },
 
