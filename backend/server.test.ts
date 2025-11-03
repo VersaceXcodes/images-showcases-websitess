@@ -1,7 +1,7 @@
 // tests/api.test.ts
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { app, pool } from '../server.ts';
+import { app, pool } from './server.ts';
 import { Readable } from 'node:stream';
 
 import { z } from 'zod';
@@ -167,7 +167,7 @@ describe('Auth Endpoints', () => {
     const data = AuthResponseSchema.parse(res.body);
     expect(data.user.email).toBe('newuser@example.com');
     // Verify token contains the new user id
-    const payload = jwt.verify(data.access_token, process.env.JWT_SECRET || 'secret');
+    const payload = jwt.verify(data.access_token, process.env.JWT_SECRET || 'secret') as jwt.JwtPayload & { user_id: string };
     expect(payload).toHaveProperty('user_id');
 
     // Ensure email verification token exists

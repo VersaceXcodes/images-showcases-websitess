@@ -62,7 +62,7 @@ export const galleriesEntitySchema = z.object({
   title: z.string().trim().nonempty(),
   description: z.string().trim().nullable(),
   template_name: z.string().trim().nonempty(),
-  visibility: z.enum(['public', 'private', 'friends']).trim().nonempty(),
+  visibility: z.enum(['public', 'private', 'friends']),
   is_published: z.boolean(),
   view_count: z.number().int().nonnegative(),
   created_at: z.coerce.date(),

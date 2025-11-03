@@ -26,6 +26,30 @@ import {
 
 dotenv.config();
 
+interface JWTPayload extends jwt.JwtPayload {
+  user_id: string;
+  email: string;
+}
+
+interface UserPayload {
+  user_id: string;
+  email: string;
+  name: string | null;
+  profile_photo_url: string | null;
+  bio: string | null;
+  contact_link: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserPayload;
+    }
+  }
+}
+
 const { Pool } = pkg;
 const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key' } = process.env;
 
@@ -33,7 +57,7 @@ const pool = new Pool(
   DATABASE_URL
     ? { 
         connectionString: DATABASE_URL, 
-        ssl: { require: true } 
+        ssl: { rejectUnauthorized: false } 
       }
     : {
         host: PGHOST,
@@ -41,7 +65,7 @@ const pool = new Pool(
         user: PGUSER,
         password: PGPASSWORD,
         port: Number(PGPORT),
-        ssl: { require: true },
+        ssl: { rejectUnauthorized: false },
       }
 );
 
@@ -50,7 +74,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // Middleware
 app.use(cors());
@@ -94,8 +118,8 @@ const upload = multer({
 });
 
 // Error response utility
-function createErrorResponse(message, error = null, errorCode = null) {
-  const response = {
+function createErrorResponse(message: string, error: any = null, errorCode: string | null = null) {
+  const response: any = {
     success: false,
     message,
     timestamp: new Date().toISOString()
@@ -129,7 +153,7 @@ const authenticateToken = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     const client = await pool.connect();
     try {
       const result = await client.query('SELECT user_id, email, name, profile_photo_url, bio, contact_link, created_at, updated_at FROM users WHERE user_id = $1', [decoded.user_id]);
@@ -509,8 +533,8 @@ app.put('/api/users/me', authenticateToken, upload.single('profile_photo'), asyn
 */
 app.get('/api/galleries', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
     const offset = (page - 1) * limit;
 
     const client = await pool.connect();
@@ -522,7 +546,7 @@ app.get('/api/galleries', async (req, res) => {
         try {
           const authHeader = req.headers.authorization;
           const token = authHeader.split(' ')[1];
-          const decoded = jwt.verify(token, JWT_SECRET);
+          const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
           
           query = `SELECT gallery_id, user_id, title, description, template_name, visibility, is_published, view_count, created_at, updated_at 
                    FROM galleries WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`;
@@ -550,7 +574,7 @@ app.get('/api/galleries', async (req, res) => {
 
       res.json({
         items: galleriesResult.rows,
-        total: parseInt(countResult.rows[0].count),
+        total: parseInt((countResult.rows[0] as any).count),
         page,
         limit
       });
@@ -627,7 +651,7 @@ app.get('/api/galleries/:gallery_id', async (req, res) => {
         try {
           const authHeader = req.headers.authorization;
           const token = authHeader.split(' ')[1];
-          const decoded = jwt.verify(token, JWT_SECRET);
+          const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
           hasAccess = gallery.user_id === decoded.user_id;
         } catch {
           // Invalid token, keep hasAccess as false
@@ -774,7 +798,7 @@ app.get('/api/galleries/:gallery_id/images', async (req, res) => {
         try {
           const authHeader = req.headers.authorization;
           const token = authHeader.split(' ')[1];
-          const decoded = jwt.verify(token, JWT_SECRET);
+          const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
           hasAccess = gallery.user_id === decoded.user_id;
         } catch {
           // Invalid token
@@ -1040,8 +1064,8 @@ app.post('/api/galleries/:gallery_id/images/reorder', authenticateToken, async (
 app.get('/api/galleries/search', async (req, res) => {
   try {
     const { tag } = req.query;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
     const offset = (page - 1) * limit;
 
     if (!tag) {
@@ -1076,7 +1100,7 @@ app.get('/api/galleries/search', async (req, res) => {
 
       res.json({
         items: galleriesResult.rows,
-        total: parseInt(countResult.rows[0].count),
+        total: parseInt((countResult.rows[0] as any).count),
         page,
         limit
       });
